@@ -4,7 +4,6 @@ import * as React from "react"
 import { CheckIcon, ChevronsUpDownIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
-import { useEffect } from "react"
 import {
     Command,
     CommandEmpty,
@@ -18,15 +17,36 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover"
+import { useDispatch, useSelector } from "react-redux"
+import { setTimezones } from "../features/timezone/timezoneSlice"
+import { addProfile, setAdmin } from "../features/profile/profileSlice"
+import { Input } from "./ui/input"
+import { config } from "../config"
+
 
 export function Dropdown({ type, inForm }) {
     const [open, setOpen] = React.useState(false)
     const [selected, setSelected] = React.useState([])
-    const [timeZone, setTimeZone] = React.useState("timezone")
+    const [selectedTimeZone, setSelectedTimeZone] = React.useState("Select timezone")
     const wrapperRef = React.useRef(null)
+    const [showAddProfileInput, setShowAddProfileInput] = React.useState(false);
+    const [profileName, setProfileName] = React.useState("")
+    // const [admin, setAdmin] = React.useState("")
+
+    const dispatch = useDispatch()
+    const timezones = useSelector((state) => state.timezone.timezones)
+    const profiles = useSelector((state) => state.profile.profiles)
+    const admin = useSelector((state) => state.profile.admin)
+
+    console.log(admin)
+    console.log(profiles)
+
+    React.useEffect(() => {
+        dispatch(setTimezones())
+    }, [dispatch])
 
 
-    useEffect(() => {
+    React.useEffect(() => {
         const handler = (e) => {
             if (wrapperRef.current && !wrapperRef.current.contains(e.target)) {
                 setOpen(false)
@@ -36,17 +56,70 @@ export function Dropdown({ type, inForm }) {
         return () => document.removeEventListener("mousedown", handler)
     }, [])
 
-
     const handleToggleSelect = (value) => {
-        setSelected((prev) =>
-            prev.includes(value)
-                ? prev.filter((v) => v !== value)
-                : [...prev, value]
-        )
+
+        if (inForm) {
+            setSelected((prev) =>
+                prev.includes(value)
+                    ? prev.filter((v) => v !== value)
+                    : [...prev, value]
+            )
+        }
+
     }
 
-    const users = [{ value: 'user1', label: 'user1' }, { value: 'user2', label: 'user2' }]
-    const timezone = [{ value: 'ist', label: 'ist' }, { value: 'gmt', label: 'gmt' }]
+    const AddProfileButtonHandler = () => {
+        setShowAddProfileInput(true);
+    }
+
+    const addProfileLogicHandler = async () => {
+
+        if (!profileName.slice()) return;
+        console.log(profileName)
+
+        try {
+            const response = await fetch(`${config.BACKEND_URL}/api/profile/add-profile`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ profileName })
+            })
+
+            const data = await response.json();
+            // dispatch(addProfile(data.data));
+
+        } catch (err) {
+            console.log(err)
+        }
+
+
+        // await dispatch(addProfile(profileName))
+        setShowAddProfileInput(false);
+    }
+
+    React.useEffect(() => {
+        const getProfiles = async () => {
+            try {
+                const res = await fetch(`${config.BACKEND_URL}/api/profile/get-profiles`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                })
+
+                const data = await res.json();
+                dispatch(addProfile(data.data));
+
+            } catch (err) {
+                console.log(err)
+            }
+        }
+
+        getProfiles()
+    }, [showAddProfileInput])
+
+
 
     return (
         <div>
@@ -56,39 +129,86 @@ export function Dropdown({ type, inForm }) {
                         variant="outline"
                         role="combobox"
                         aria-expanded={open}
-                        className="w-[100%] justify-between bg-[#f5f7f9]"
+                        className="w-full justify-between bg-[#f5f7f9]"
                         onClick={() => setOpen(!open)}
                     >
-                        {selected.length > 0 ? (type === 'profile' ? (inForm ? `${selected.length} profile selected` : selected[0]) : timeZone) : (type === 'profile' ? (inForm ? "Select Profiles" : 'Select current profile') : timeZone)}
+                        {type === "profile" ? (inForm ? (selected.length > 0 ? `${selected.length} profile(s) selected` : "Select profiles") : (admin ? admin : "Select current profile")) : (selectedTimeZone)}
+
+
+
+
                         <ChevronsUpDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                     </Button>
                 </PopoverTrigger>
 
-                <PopoverContent ref={wrapperRef} id="popoverContent" className="w-[200px] p-0">
+                <PopoverContent ref={wrapperRef} className="w-[200px] p-0">
                     <Command>
-                        <CommandInput placeholder={type === 'profile' ? (inForm ? "Search profiles..." : 'sea current profile...') : 'Search timezone...'} />
+                        <CommandInput
+                            placeholder={
+                                type === "profile"
+                                    ? inForm
+                                        ? "Search profiles..."
+                                        : "Search current profile..."
+                                    : "Search timezones..."
+                            }
+                        />
                         <CommandList>
-                            <CommandEmpty>No framework found.</CommandEmpty>
-                            <CommandGroup>
-                                {type === 'profile' ? users : timezone.map((data) => (
-                                    <CommandItem
-                                        key={data.value}
-                                        value={data.value}
-                                        onSelect={() => handleToggleSelect(data.value)}
-                                    >
+                            <CommandEmpty>No results found.</CommandEmpty>
 
-                                        <CheckIcon
-                                            className={cn(
-                                                "mr-2 h-4 w-4",
-                                                selected.includes(data.value)
-                                                    ? "opacity-100"
-                                                    : "opacity-0"
-                                            )}
-                                        />
-                                        {data.label}
+                            <CommandGroup>
+                                {(type === "profile" ? profiles : timezones).map((data) => (
+                                    <CommandItem
+                                        // key={data.name + "1"}
+                                        value={data.name}
+                                        onSelect={() => {
+                                            if (type === "profile") {
+                                                if (!inForm) {
+                                                    dispatch(setAdmin(data.name))
+                                                    setOpen(false)
+                                                } else {
+                                                    handleToggleSelect(data.name)
+
+                                                }
+
+                                            } else {
+                                                setSelectedTimeZone(data.label)
+                                                setOpen(false)
+                                            }
+                                        }}
+                                    >
+                                        {type === "profile" && (
+                                            <CheckIcon
+                                                className={cn(
+                                                    "mr-2 h-4 w-4",
+                                                    selected.includes(data.name)
+                                                        ? "opacity-100"
+                                                        : "opacity-0"
+                                                )}
+                                            />
+                                        )}
+                                        {type === "profile" ? data.name : data.label}
                                     </CommandItem>
                                 ))}
                             </CommandGroup>
+
+
+                            {!showAddProfileInput ? (<Button
+                                variant='otline'
+                                className='border-t-1 border-t-gray-300 w-full cursor-pointer'
+                                onClick={AddProfileButtonHandler}
+                            >
+                                +  Add Profile
+                            </Button>) :
+                                (<div className=" px-1 py-1 flex items-center gap-2 w-[100%]">
+                                    <Input
+                                        type='text'
+                                        placeholder
+                                        className='w-3/4'
+                                        onChange={(e) => setProfileName(e.target.value)}
+                                    />
+                                    <Button size='sm' className='1/4 bg-[#6852df] cursor-pointer' onClick={addProfileLogicHandler}>Add</Button>
+                                </div>)
+                            }
                         </CommandList>
                     </Command>
                 </PopoverContent>

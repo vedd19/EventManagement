@@ -8,8 +8,6 @@ function App() {
   return (
     <div className=' h-screen flex justify-center bg-[#f5f7f9]'>
       <Home />
-
-      {/* <Popover>hello</Popover> */}
     </div>
   )
 }

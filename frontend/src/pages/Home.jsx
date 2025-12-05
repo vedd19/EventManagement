@@ -8,6 +8,10 @@ import { useDispatch } from 'react-redux'
 
 export const Home = () => {
 
+    // const createEventHandler = () => {
+
+    // }
+
     return (
         <div className='container w-[80%]'>
             <div className="flex justify-between py-4">
@@ -17,7 +21,7 @@ export const Home = () => {
                 </div>
 
                 <div className="">
-                    userlist
+                    <Dropdown type='profile' key={'userTopProfile'} inForm={false} />
                 </div>
             </div>
 
@@ -28,30 +32,30 @@ export const Home = () => {
                     <div className="flex flex-col gap-5">
                         <div className="">
                             <Label className="py-3">Profile</Label>
-                            <Dropdown type='timeZone' inForm={false} />
+                            <Dropdown type='profile' key={'userProfile'} inForm={true} />
                         </div>
 
                         <div className="">
                             <Label className="py-3">Timezone</Label>
-                            <Dropdown className='w-[100%]' type='timeZone' inForm={false} />
+                            <Dropdown type='timezone' key={'timezone'} className='w-[100%]' inForm={true} />
                         </div>
                         <div className="">
                             <Label className="py-3">Start Date & Time</Label>
-                            <DateField className='w-[100%]' />
+                            <DateField endDateInput={false} className='w-[100%]' />
                         </div>
-
-
 
                         <div className="">
                             <Label className="py-3">End Date & Time</Label>
-                            <DateField className='w-[100%]' />
+                            <DateField endDateInput={true} className='w-[100%]' />
                         </div>
 
                         <div className="w-[100%]">
                             <Button
+
                                 className='bg-[#6852df] w-full'
                                 variant="default"
                                 size='default'
+                                onClick={createEventHandler}
                             >
                                 + Create Event
                             </Button>
@@ -68,7 +72,7 @@ export const Home = () => {
 
                     <div className="">
                         <Label className="py-3">View in Timezone</Label>
-                        <Dropdown className='w-[100%]' type='timeZone' inForm={false} />
+                        <Dropdown className='w-[100%]' type='timezone' inForm={false} />
                     </div>
 
                     <div className="">

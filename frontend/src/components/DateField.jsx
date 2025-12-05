@@ -13,10 +13,26 @@ import {
 } from "@/components/ui/popover"
 import { cn } from "@/lib/utils"
 import { Input } from "@/components/ui/input"
+import { useDispatch, useSelector } from "react-redux"
+import { setEndDate, setEndTime, setStartDate, setStartTime } from "../features/profile/profileSlice"
 
-export function DateField() {
+export function DateField({ endDateInput }) {
     const [date, setDate] = React.useState(null)
     const [time, setTime] = React.useState("09:00")
+
+    const startDate = useSelector((state) => state.profile.startDate)
+    const endDate = useSelector((state) => state.profile.endDate)
+    const dispatch = useDispatch()
+
+    React.useEffect(() => {
+        if (endDateInput) {
+            dispatch(setEndTime(time))
+            console.log(startDate, "startdate")
+        } else {
+            console.log(endDate)
+            dispatch(setStartTime(time))
+        }
+    }, [time])
 
     return (
         <div className="flex items-center gap-3 w-[100%] relative">
@@ -25,6 +41,7 @@ export function DateField() {
                 <Popover className=''>
                     <PopoverTrigger asChild>
                         <Button
+                            disabled={!startDate && endDateInput}
                             variant="outline"
                             className={cn(
                                 "justify-start text-left font-normal w-full bg-[#f5f7f9]",
@@ -40,7 +57,17 @@ export function DateField() {
                         <Calendar
                             mode="single"
                             selected={date}
-                            onSelect={setDate}
+                            onSelect={(selectedDate) => {
+                                setDate(selectedDate)
+
+                                if (endDateInput) {
+                                    dispatch(setEndDate(selectedDate))
+                                    console.log(startDate, "startdate")
+                                } else {
+                                    console.log(endDate)
+                                    dispatch(setStartDate(selectedDate))
+                                }
+                            }}
                             initialFocus
                         />
                     </PopoverContent>
