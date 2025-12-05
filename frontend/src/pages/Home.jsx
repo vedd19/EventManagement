@@ -1,7 +1,13 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Label } from '../components/ui/label'
 import { Dropdown } from '../components/Dropdown'
+import { Button } from '../components/ui/button'
+import { DateField } from '../components/DateField'
+import { useDispatch } from 'react-redux'
+
+
 export const Home = () => {
+
     return (
         <div className='container w-[80%]'>
             <div className="flex justify-between py-4">
@@ -31,11 +37,24 @@ export const Home = () => {
                         </div>
                         <div className="">
                             <Label className="py-3">Start Date & Time</Label>
-                            <Dropdown type='timeZone' inForm={false} />
+                            <DateField className='w-[100%]' />
                         </div>
+
+
+
                         <div className="">
                             <Label className="py-3">End Date & Time</Label>
-                            <Dropdown type='timeZone' inForm={false} />
+                            <DateField className='w-[100%]' />
+                        </div>
+
+                        <div className="w-[100%]">
+                            <Button
+                                className='bg-[#6852df] w-full'
+                                variant="default"
+                                size='default'
+                            >
+                                + Create Event
+                            </Button>
                         </div>
                     </div>
 
@@ -55,9 +74,6 @@ export const Home = () => {
                     <div className="">
                         Details
                     </div>
-
-
-
                 </div>
             </div>
         </div>
