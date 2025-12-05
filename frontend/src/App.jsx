@@ -8,7 +8,7 @@ function App() {
   return (
     <div className=' h-screen flex justify-center bg-[#f5f7f9]'>
       <Home />
-      <Dropdown type='timeZone' inForm={false} />
+
       {/* <Popover>hello</Popover> */}
     </div>
   )

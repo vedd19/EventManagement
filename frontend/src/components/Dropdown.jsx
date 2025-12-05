@@ -56,7 +56,7 @@ export function Dropdown({ type, inForm }) {
                         variant="outline"
                         role="combobox"
                         aria-expanded={open}
-                        className="w-[200px] justify-between"
+                        className="w-[100%] justify-between bg-[#f5f7f9]"
                         onClick={() => setOpen(!open)}
                     >
                         {selected.length > 0 ? (type === 'profile' ? (inForm ? `${selected.length} profile selected` : selected[0]) : timeZone) : (type === 'profile' ? (inForm ? "Select Profiles" : 'Select current profile') : timeZone)}
