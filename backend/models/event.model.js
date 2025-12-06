@@ -10,6 +10,12 @@ const eventSchema = new mongoose.Schema({
         required: true
     },
 
+    creator: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Profiles",
+        required: true
+    },
+
     timezone: {
         type: String,
         required: true
@@ -22,6 +28,11 @@ const eventSchema = new mongoose.Schema({
     endDateObj: {
         type: Date,
         required: true
+    },
+
+    version: {
+        type: Number,
+        default: 1
     }
 
 }, { timestamps: true });

@@ -27,12 +27,10 @@ export function DateField({ endDateInput }) {
     React.useEffect(() => {
         if (endDateInput) {
             dispatch(setEndTime(time))
-            console.log(startDate, "startdate")
         } else {
-            console.log(endDate)
             dispatch(setStartTime(time))
         }
-    }, [time])
+    }, [time, endDateInput, dispatch])
 
     return (
         <div className="flex items-center gap-3 w-[100%] relative">
@@ -60,12 +58,13 @@ export function DateField({ endDateInput }) {
                             onSelect={(selectedDate) => {
                                 setDate(selectedDate)
 
+                                
+                                const isoDate = selectedDate.toISOString().split('T')[0]
+
                                 if (endDateInput) {
-                                    dispatch(setEndDate(selectedDate))
-                                    console.log(startDate, "startdate")
+                                    dispatch(setEndDate(isoDate))
                                 } else {
-                                    console.log(endDate)
-                                    dispatch(setStartDate(selectedDate))
+                                    dispatch(setStartDate(isoDate))
                                 }
                             }}
                             initialFocus

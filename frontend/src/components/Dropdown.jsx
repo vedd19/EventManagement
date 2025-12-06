@@ -19,10 +19,10 @@ import {
 } from "@/components/ui/popover"
 import { useDispatch, useSelector } from "react-redux"
 import { setTimezones } from "../features/timezone/timezoneSlice"
-import { addProfile, setAdmin } from "../features/profile/profileSlice"
+import { addProfile, setAdmin, setAdminId, setSelectedProfiles } from "../features/profile/profileSlice"
 import { Input } from "./ui/input"
 import { config } from "../config"
-
+import { setSelTimeZone } from "../features/timezone/timezoneSlice"
 
 export function Dropdown({ type, inForm }) {
     const [open, setOpen] = React.useState(false)
@@ -37,6 +37,7 @@ export function Dropdown({ type, inForm }) {
     const timezones = useSelector((state) => state.timezone.timezones)
     const profiles = useSelector((state) => state.profile.profiles)
     const admin = useSelector((state) => state.profile.admin)
+    const selectedTZFromRedux = useSelector((state) => state.timezone.selectedTZ)
 
     console.log(admin)
     console.log(profiles)
@@ -45,6 +46,11 @@ export function Dropdown({ type, inForm }) {
         dispatch(setTimezones())
     }, [dispatch])
 
+    React.useEffect(() => {
+        if (selectedTZFromRedux && type === "timezone") {
+            setSelectedTimeZone(selectedTZFromRedux)
+        }
+    }, [selectedTZFromRedux, type])
 
     React.useEffect(() => {
         const handler = (e) => {
@@ -59,11 +65,13 @@ export function Dropdown({ type, inForm }) {
     const handleToggleSelect = (value) => {
 
         if (inForm) {
-            setSelected((prev) =>
-                prev.includes(value)
+            setSelected((prev) => {
+                const updated = prev.includes(value)
                     ? prev.filter((v) => v !== value)
                     : [...prev, value]
-            )
+                dispatch(setSelectedProfiles(updated))
+                return updated
+            })
         }
 
     }
@@ -74,7 +82,7 @@ export function Dropdown({ type, inForm }) {
 
     const addProfileLogicHandler = async () => {
 
-        if (!profileName.slice()) return;
+        if (!profileName.trim()) return;
         console.log(profileName)
 
         try {
@@ -164,14 +172,16 @@ export function Dropdown({ type, inForm }) {
                                             if (type === "profile") {
                                                 if (!inForm) {
                                                     dispatch(setAdmin(data.name))
+                                                    dispatch(setAdminId(data._id))
                                                     setOpen(false)
                                                 } else {
-                                                    handleToggleSelect(data.name)
+                                                    handleToggleSelect(data._id)
 
                                                 }
 
                                             } else {
                                                 setSelectedTimeZone(data.label)
+                                                dispatch(setSelTimeZone(data.label))
                                                 setOpen(false)
                                             }
                                         }}
@@ -180,9 +190,13 @@ export function Dropdown({ type, inForm }) {
                                             <CheckIcon
                                                 className={cn(
                                                     "mr-2 h-4 w-4",
-                                                    selected.includes(data.name)
-                                                        ? "opacity-100"
-                                                        : "opacity-0"
+                                                    inForm
+                                                        ? selected.includes(data._id)
+                                                            ? "opacity-100"
+                                                            : "opacity-0"
+                                                        : selected.includes(data._id) && selected.length > 0
+                                                            ? "opacity-100"
+                                                            : "opacity-0"
                                                 )}
                                             />
                                         )}
