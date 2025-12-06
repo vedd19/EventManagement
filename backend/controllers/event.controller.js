@@ -27,33 +27,31 @@ const generateChangeMessage = async (changes, action) => {
             messages.push(`Timezone updated from ${changes.timezone.old} to ${changes.timezone.new}`);
         }
         if (changes.profiles) {
-            const oldProfileIds = changes.profiles.old.map(p => typeof p === 'string' ? p : p._id);
-            const newProfileIds = changes.profiles.new.map(p => typeof p === 'string' ? p : p._id);
+            const normalize = (p) => {
+                if (!p) return null;
+                if (typeof p === "string") return p;
+                return p._id?.toString();
+            };
 
-            // Find removed and added profiles
+            const oldProfileIds = changes.profiles.old.map(normalize).filter(Boolean);
+            const newProfileIds = changes.profiles.new.map(normalize).filter(Boolean);
+
             const removedIds = oldProfileIds.filter(id => !newProfileIds.includes(id));
             const addedIds = newProfileIds.filter(id => !oldProfileIds.includes(id));
 
             if (removedIds.length > 0) {
-                try {
-                    const removedProfiles = await profileModel.find({ _id: { $in: removedIds } });
-                    const removedNames = removedProfiles.map(p => p.name).join(", ");
-                    messages.push(`Removed users: ${removedNames}`);
-                } catch (err) {
-                    messages.push(`Removed users`);
-                }
+                const removedProfiles = await profileModel.find({ _id: { $in: removedIds } });
+                const names = removedProfiles.map(p => p.name).join(", ");
+                messages.push(`Removed users: ${names}`);
             }
 
             if (addedIds.length > 0) {
-                try {
-                    const addedProfiles = await profileModel.find({ _id: { $in: addedIds } });
-                    const addedNames = addedProfiles.map(p => p.name).join(", ");
-                    messages.push(`User added: ${addedNames}`);
-                } catch (err) {
-                    messages.push(`User added`);
-                }
+                const addedProfiles = await profileModel.find({ _id: { $in: addedIds } });
+                const names = addedProfiles.map(p => p.name).join(", ");
+                messages.push(`User added: ${names}`);
             }
         }
+
     }
 
     return messages.length > 0 ? messages.join("; ") : "No changes recorded";

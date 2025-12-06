@@ -53,6 +53,7 @@ export function EventDetailsModal({ event, isOpen, onClose, currentAdminId, init
 
     const handleFetchLogs = useCallback(async () => {
         setIsLoading(true)
+        setShowLogs(true);
         try {
             const res = await fetch(`${config.BACKEND_URL}/api/event/get-event-logs/${event._id}`, {
                 method: 'GET',
@@ -176,176 +177,156 @@ export function EventDetailsModal({ event, isOpen, onClose, currentAdminId, init
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                <DialogHeader>
+                {!showLogs && <DialogHeader>
                     <DialogTitle>
                         Event Details
                     </DialogTitle>
-                </DialogHeader>
+                </DialogHeader>}
 
-                {!showLogs ? (
-                    <div className="space-y-4 py-4">
-                        {isEditing ? (
-                            <>
-                                <div>
-                                    <Label className="py-3 font-semibold">Profiles</Label>
-                                    <Popover>
-                                        <PopoverTrigger asChild>
-                                            <Button
-                                                variant="outline"
-                                                role="combobox"
-                                                className="w-full justify-between bg-[#f5f7f9]"
-                                            >
-                                                {editProfiles.length > 0
-                                                    ? `${editProfiles.length} profile(s) selected`
-                                                    : "Select profiles..."}
-                                                <ChevronsUpDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                                            </Button>
-                                        </PopoverTrigger>
-                                        <PopoverContent className="w-full p-0">
-                                            <Command>
-                                                <CommandInput placeholder="Search profiles..." />
-                                                <CommandEmpty>No profiles found.</CommandEmpty>
-                                                <CommandGroup>
-                                                    <CommandList>
-                                                        {allProfiles?.map((profile) => (
-                                                            <CommandItem
-                                                                key={profile._id}
-                                                                value={profile._id}
-                                                                onSelect={() => {
-                                                                    if (editProfiles.includes(profile._id)) {
-                                                                        setEditProfiles(
-                                                                            editProfiles.filter(id => id !== profile._id)
-                                                                        )
-                                                                    } else {
-                                                                        setEditProfiles([...editProfiles, profile._id])
-                                                                    }
-                                                                }}
-                                                            >
-                                                                <CheckIcon
-                                                                    className={`mr-2 h-4 w-4 ${editProfiles.includes(profile._id)
-                                                                        ? "opacity-100"
-                                                                        : "opacity-0"
-                                                                        }`}
-                                                                />
-                                                                {profile.name}
-                                                            </CommandItem>
-                                                        ))}
-                                                    </CommandList>
-                                                </CommandGroup>
-                                            </Command>
-                                        </PopoverContent>
-                                    </Popover>
-                                </div>
 
-                                <div>
-                                    <Label className="py-3 font-semibold">Timezone</Label>
-                                    <select
-                                        value={editTimezone}
-                                        onChange={(e) => setEditTimezone(e.target.value)}
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-md bg-[#f5f7f9]"
-                                    >
-                                        <option value="">Select timezone</option>
-                                        <option value="Eastern Time (ET)">Eastern Time (ET)</option>
-                                        <option value="Central Time (CT)">Central Time (CT)</option>
-                                        <option value="Mountain Time (MT)">Mountain Time (MT)</option>
-                                        <option value="Pacific Time (PT)">Pacific Time (PT)</option>
-                                        <option value="Alaska Time (AKT)">Alaska Time (AKT)</option>
-                                        <option value="Hawaii Time (HT)">Hawaii Time (HT)</option>
-                                        <option value="London (GMT/BST)">London (GMT/BST)</option>
-                                        <option value="Paris (CET/CEST)">Paris (CET/CEST)</option>
-                                        <option value="Berlin (CET/CEST)">Berlin (CET/CEST)</option>
-                                        <option value="India Standard Time (IST)">India Standard Time (IST)</option>
-                                        <option value="China Standard Time (CST)">China Standard Time (CST)</option>
-                                        <option value="Japan Standard Time (JST)">Japan Standard Time (JST)</option>
-                                        <option value="Singapore Time (SGT)">Singapore Time (SGT)</option>
-                                        <option value="Hong Kong Time (HKT)">Hong Kong Time (HKT)</option>
-                                        <option value="Australia Western Time (AWST)">Australia Western Time (AWST)</option>
-                                        <option value="Australia Central Time (ACST)">Australia Central Time (ACST)</option>
-                                        <option value="Australia Eastern Time (AEST)">Australia Eastern Time (AEST)</option>
-                                        <option value="UAE Time (GST)">UAE Time (GST)</option>
-                                        <option value="Saudi Arabia Time (AST)">Saudi Arabia Time (AST)</option>
-                                        <option value="Brazil Time (BRT)">Brazil Time (BRT)</option>
-                                        <option value="Argentina Time (ART)">Argentina Time (ART)</option>
-                                        <option value="Moscow Time (MSK)">Moscow Time (MSK)</option>
-                                    </select>
-                                </div>
-
-                                <div className="space-y-3">
-                                    <div>
-                                        <Label className="py-3 font-semibold">Start Date & Time</Label>
-                                        <div className="flex gap-2">
-                                            <Input
-                                                type="date"
-                                                value={editStartDate}
-                                                onFocus={handleFocusStartDate}
-                                                onChange={(e) => setEditStartDate(e.target.value)}
-                                                className="flex-1 bg-[#f5f7f9]"
-                                            />
-                                            <Input
-                                                type="time"
-                                                value={editStartTime}
-                                                onChange={(e) => setEditStartTime(e.target.value)}
-                                                className="w-32 bg-[#f5f7f9]"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div>
-                                        <Label className="py-3 font-semibold">End Date & Time</Label>
-                                        <div className="flex gap-2">
-                                            <Input
-                                                type="date"
-                                                value={editEndDate}
-                                                onFocus={handleFocusEndDate}
-                                                onChange={(e) => setEditEndDate(e.target.value)}
-                                                className="flex-1 bg-[#f5f7f9]"
-                                            />
-
-                                            <Input
-                                                type="time"
-                                                value={editEndTime}
-                                                onChange={(e) => setEditEndTime(e.target.value)}
-                                                className="w-32 bg-[#f5f7f9]"
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
-                            </>
+                {
+                    showLogs ? (
+                        isLoading ? (
+                            <div className="p-6 text-center">Loading logs...</div>
                         ) : (
-                            <>
-                                <div>
-                                    <Label className="font-semibold">Timezone</Label>
-                                    <p className="text-sm">{selectedTimezone || event.timezone}</p>
-                                </div>
-
-                                <div>
-                                    <Label className="font-semibold">Start Date & Time</Label>
-                                    <p className="text-sm">
-                                        {startDateFormatted?.dateTime || event.startDateObj}
-                                    </p>
-                                </div>
-
-                                <div>
-                                    <Label className="font-semibold">End Date & Time</Label>
-                                    <p className="text-sm">
-                                        {endDateFormatted?.dateTime || event.endDateObj}
-                                    </p>
-                                </div>
-
-                                <div>
-                                    <Label className="font-semibold">Profiles</Label>
-                                    <div className="text-sm space-y-1">
-                                        {event.profiles?.map(p => (
-                                            <p key={p._id}>{p.name}</p>
-                                        )) || "No profiles"}
+                            <EventLogs logs={eventLogs} />
+                        )
+                    ) : (
+                        <div className={(isEditing || showLogs) && "space-y-4 py-4"}>
+                            {isEditing ? (
+                                <>
+                                    <div>
+                                        <Label className="py-3 font-semibold">Profiles</Label>
+                                        <Popover>
+                                            <PopoverTrigger asChild>
+                                                <Button
+                                                    variant="outline"
+                                                    role="combobox"
+                                                    className="w-full justify-between bg-[#f5f7f9]"
+                                                >
+                                                    {editProfiles.length > 0
+                                                        ? `${editProfiles.length} profile(s) selected`
+                                                        : "Select profiles..."}
+                                                    <ChevronsUpDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                                                </Button>
+                                            </PopoverTrigger>
+                                            <PopoverContent className="w-full p-0">
+                                                <Command>
+                                                    <CommandInput placeholder="Search profiles..." />
+                                                    <CommandEmpty>No profiles found.</CommandEmpty>
+                                                    <CommandGroup>
+                                                        <CommandList>
+                                                            {allProfiles?.map((profile) => (
+                                                                <CommandItem
+                                                                    key={profile._id}
+                                                                    value={profile._id}
+                                                                    onSelect={() => {
+                                                                        if (editProfiles.includes(profile._id)) {
+                                                                            setEditProfiles(
+                                                                                editProfiles.filter(id => id !== profile._id)
+                                                                            )
+                                                                        } else {
+                                                                            setEditProfiles([...editProfiles, profile._id])
+                                                                        }
+                                                                    }}
+                                                                >
+                                                                    <CheckIcon
+                                                                        className={`mr-2 h-4 w-4 ${editProfiles.includes(profile._id)
+                                                                            ? "opacity-100"
+                                                                            : "opacity-0"
+                                                                            }`}
+                                                                    />
+                                                                    {profile.name}
+                                                                </CommandItem>
+                                                            ))}
+                                                        </CommandList>
+                                                    </CommandGroup>
+                                                </Command>
+                                            </PopoverContent>
+                                        </Popover>
                                     </div>
-                                </div>
-                            </>
-                        )}
-                    </div>
-                ) : (
-                    <EventLogs logs={eventLogs} />
-                )}
+
+                                    <div>
+                                        <Label className="py-3 font-semibold">Timezone</Label>
+                                        <select
+                                            value={editTimezone}
+                                            onChange={(e) => setEditTimezone(e.target.value)}
+                                            className="w-full px-3 py-2 border border-gray-300 rounded-md bg-[#f5f7f9]"
+                                        >
+                                            <option value="">Select timezone</option>
+                                            <option value="Eastern Time (ET)">Eastern Time (ET)</option>
+                                            <option value="Central Time (CT)">Central Time (CT)</option>
+                                            <option value="Mountain Time (MT)">Mountain Time (MT)</option>
+                                            <option value="Pacific Time (PT)">Pacific Time (PT)</option>
+                                            <option value="Alaska Time (AKT)">Alaska Time (AKT)</option>
+                                            <option value="Hawaii Time (HT)">Hawaii Time (HT)</option>
+                                            <option value="London (GMT/BST)">London (GMT/BST)</option>
+                                            <option value="Paris (CET/CEST)">Paris (CET/CEST)</option>
+                                            <option value="Berlin (CET/CEST)">Berlin (CET/CEST)</option>
+                                            <option value="India Standard Time (IST)">India Standard Time (IST)</option>
+                                            <option value="China Standard Time (CST)">China Standard Time (CST)</option>
+                                            <option value="Japan Standard Time (JST)">Japan Standard Time (JST)</option>
+                                            <option value="Singapore Time (SGT)">Singapore Time (SGT)</option>
+                                            <option value="Hong Kong Time (HKT)">Hong Kong Time (HKT)</option>
+                                            <option value="Australia Western Time (AWST)">Australia Western Time (AWST)</option>
+                                            <option value="Australia Central Time (ACST)">Australia Central Time (ACST)</option>
+                                            <option value="Australia Eastern Time (AEST)">Australia Eastern Time (AEST)</option>
+                                            <option value="UAE Time (GST)">UAE Time (GST)</option>
+                                            <option value="Saudi Arabia Time (AST)">Saudi Arabia Time (AST)</option>
+                                            <option value="Brazil Time (BRT)">Brazil Time (BRT)</option>
+                                            <option value="Argentina Time (ART)">Argentina Time (ART)</option>
+                                            <option value="Moscow Time (MSK)">Moscow Time (MSK)</option>
+                                        </select>
+                                    </div>
+
+                                    <div className="space-y-3">
+                                        <div>
+                                            <Label className="py-3 font-semibold">Start Date & Time</Label>
+                                            <div className="flex gap-2">
+                                                <Input
+                                                    type="date"
+                                                    value={editStartDate}
+                                                    onFocus={handleFocusStartDate}
+                                                    onChange={(e) => setEditStartDate(e.target.value)}
+                                                    className="flex-1 bg-[#f5f7f9]"
+                                                />
+                                                <Input
+                                                    type="time"
+                                                    value={editStartTime}
+                                                    onChange={(e) => setEditStartTime(e.target.value)}
+                                                    className="w-32 bg-[#f5f7f9]"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <Label className="py-3 font-semibold">End Date & Time</Label>
+                                            <div className="flex gap-2">
+                                                <Input
+                                                    type="date"
+                                                    value={editEndDate}
+                                                    onFocus={handleFocusEndDate}
+                                                    onChange={(e) => setEditEndDate(e.target.value)}
+                                                    className="flex-1 bg-[#f5f7f9]"
+                                                />
+
+                                                <Input
+                                                    type="time"
+                                                    value={editEndTime}
+                                                    onChange={(e) => setEditEndTime(e.target.value)}
+                                                    className="w-32 bg-[#f5f7f9]"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </>
+                            ) : (
+                                <>
+                                    <EventLogs logs={eventLogs} />
+                                </>
+                            )}
+                        </div>
+                    )}
 
                 <DialogFooter className="flex gap-2 justify-end flex-wrap">
                     {!showLogs && canEdit && !isEditing && (
@@ -361,7 +342,10 @@ export function EventDetailsModal({ event, isOpen, onClose, currentAdminId, init
                         <>
                             <Button
                                 variant="outline"
-                                onClick={() => setIsEditing(false)}
+                                onClick={() => {
+                                    setIsEditing(false)
+                                    onClose()
+                                }}
                                 disabled={isSaving}
                             >
                                 Cancel
